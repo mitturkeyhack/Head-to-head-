@@ -119,7 +119,8 @@ public class AssistantService extends Service {
             return;
         }
         if (!bizAcdik || sohbet != null) return;
-        h.postDelayed(() -> { hoparlor(true); sohbetBaslat(true); }, 1200);
+        boolean hop = new Ayar(this).hoparlorModu() == 0;
+        h.postDelayed(() -> { if (hop) hoparlor(true); else Log2.add(this, "📱 Arama kulaklıkta, asistan sesi alarm hoparlöründen."); sohbetBaslat(true); }, 1200);
     }
 
     private void kapandi() {

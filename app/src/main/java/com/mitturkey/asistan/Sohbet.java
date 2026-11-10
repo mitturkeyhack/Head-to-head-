@@ -115,7 +115,8 @@ public class Sohbet {
         if (durum[0] != TextToSpeech.SUCCESS) return false;
         int r = tts.setLanguage(new Locale("tr", "TR"));
         if (r < 0) Log2.add(ctx, "Uyarı: Türkçe ses paketi eksik olabilir (Ayarlar > Metin okuma).");
-        switch (ayar.sesTuru()) {
+        int tur = ayar.hoparlorModu() == 1 ? 1 : ayar.sesTuru();
+        switch (tur) {
             case 1: usage = AudioAttributes.USAGE_ALARM; break;
             case 2: usage = AudioAttributes.USAGE_VOICE_COMMUNICATION; break;
             default: usage = AudioAttributes.USAGE_MEDIA;
@@ -196,8 +197,8 @@ public class Sohbet {
                 Log2.level(rms);
                 toplamMs += 100;
 
-                if (tabanSay < 4) { taban += rms; tabanSay++; if (tabanSay == 4) taban /= 4; continue; }
-                double esik = Math.max(350, taban * 2.2);
+                if (tabanSay < 3) { taban += rms; tabanSay++; if (tabanSay == 3) taban /= 3; continue; }
+                double esik = Math.max(300, Math.min(taban, 1200) * 2.0);
 
                 if (rms > esik) { konusuyor = true; sessizMs = 0; }
                 else if (konusuyor) sessizMs += 100;
@@ -215,7 +216,7 @@ public class Sohbet {
             rec.release();
         }
         Log2.add(ctx, "Mikrofon en yüksek seviye: " + enYuksek + (enYuksek < 60 ? "  ⚠️ (mikrofon kapalı olabilir)" : ""));
-        if (!konusuyor || out.size() < RATE * 2 / 2) return null; // 0.5 sn'den kısa
+        if (!konusuyor || out.size() < RATE * 2 * 3 / 10) return null; // 0.3 sn'den kısa
         return out.toByteArray();
     }
 

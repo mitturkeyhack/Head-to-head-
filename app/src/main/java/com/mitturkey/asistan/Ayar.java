@@ -27,6 +27,9 @@ public class Ayar {
     public void sesKaydet(boolean g, String ad, String model) {
         p.edit().putBoolean("gses", g).putString("sesadi", ad).putString("sesmodel", model).apply();
     }
+    /** 0 = arama hoparlörde, 1 = arama kulaklıkta (asistan sesi alarm hoparlöründen) */
+    public int hoparlorModu() { return p.getInt("hmod", 1); }
+    public void setHoparlorModu(int m) { p.edit().putInt("hmod", m).apply(); }
     public boolean acik()    { return p.getBoolean("acik", false); }
 
     public void kaydet(String key, String model, String ad, String selam, String bilgi, int bekle, int ses) {

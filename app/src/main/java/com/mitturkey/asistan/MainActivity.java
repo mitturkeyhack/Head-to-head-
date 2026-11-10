@@ -27,7 +27,7 @@ import java.util.List;
 
 public class MainActivity extends Activity implements Log2.Listener {
     private EditText key, model, ad, selam, bilgi, bekle;
-    private Spinner ses, motor;
+    private Spinner ses, motor, hmod;
     private EditText sesAdi, sesModel;
     private Button acKapa, erisimB;
     private TextView log;
@@ -107,6 +107,13 @@ public class MainActivity extends Activity implements Log2.Listener {
         dene.setText("🔈 Sesi dene");
         dene.setOnClickListener(v -> sesiDene());
         k.addView(dene);
+
+        k.addView(etiket("Arama nasıl açılsın (karşı taraf asistanı duymazsa değiştir)"));
+        hmod = new Spinner(this);
+        hmod.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
+                new String[]{"Arama hoparlörde", "Arama kulaklıkta, asistan alarm hoparlöründen"}));
+        hmod.setSelection(ayar.hoparlorModu());
+        k.addView(hmod);
 
         k.addView(etiket("Asistan sesi hangi kanaldan çıksın (karşı taraf duymazsa değiştir)"));
         ses = new Spinner(this);
@@ -230,6 +237,7 @@ public class MainActivity extends Activity implements Log2.Listener {
         ayar.kaydet(key.getText().toString().trim(), m.isEmpty() ? "gemini-3.5-flash" : m,
                 ad.getText().toString(), selam.getText().toString(), bilgi.getText().toString(),
                 sn, ses.getSelectedItemPosition());
+        ayar.setHoparlorModu(hmod.getSelectedItemPosition());
         ayar.sesKaydet(motor.getSelectedItemPosition() == 0, sesAdi.getText().toString().trim(),
                 sesModel.getText().toString().trim());
     }
