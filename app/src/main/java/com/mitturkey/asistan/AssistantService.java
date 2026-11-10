@@ -54,6 +54,7 @@ public class AssistantService extends Service {
         try {
             tm.registerTelephonyCallback(getMainExecutor(), cagri);
             Log2.add(this, "✅ Asistan açıldı, aramalar bekleniyor.");
+            GeminiSes.onceHazirla(this, new Ayar(this));
         } catch (SecurityException e) {
             Log2.add(this, "Telefon durumu izni yok!");
         }

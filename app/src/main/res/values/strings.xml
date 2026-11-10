@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="erisim_ad">Sesli Asistan mikrofonu</string>
+    <string name="erisim_aciklama">Android, telefon görüşmesi sırasında mikrofonu normal uygulamalara kapatır. Bu izin, asistanın görüşmede arayanı duyabilmesi için gereklidir. Ekranındaki hiçbir şeyi okumaz.</string>
+</resources>

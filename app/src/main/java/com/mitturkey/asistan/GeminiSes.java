@@ -24,6 +24,25 @@ public class GeminiSes {
     public static final int RATE = 24000;
     private static volatile AudioTrack calan;
     private static int sonRate = RATE;
+    /** Kota dolunca bir süre hiç denemeyelim, görüşme beklemesin. */
+    private static volatile long kotaDoluKadar = 0;
+
+    /** Sabit cümleler: bir kere üretilip saklanır. */
+    public static final String[] SABIT = {
+            "Sizi duyamadım, tekrar söyler misiniz?",
+            "Sizi duyamıyorum. Daha sonra tekrar arayabilirsiniz. Hoşça kalın.",
+            "Notunuzu aldım. Hoşça kalın.",
+            "Bir sorun oluştu, kusura bakmayın. Hoşça kalın.",
+            "Görüşme süresi doldu, notunuzu ilettim. Hoşça kalın."};
+
+    /** Açılış ve sabit cümleleri arka planda önceden hazırlar. */
+    public static void onceHazirla(Context ctx, Ayar ayar) {
+        if (!ayar.geminiSes() || ayar.apiKey().isEmpty()) return;
+        new Thread(() -> {
+            al(ctx, ayar, ayar.selam());
+            for (String s : SABIT) { if (System.currentTimeMillis() < kotaDoluKadar) return; al(ctx, ayar, s); }
+        }).start();
+    }
 
     /** PCM ses döner, hata olursa null. Aynı cümleyi bir daha istemesin diye önbelleğe kaydeder. */
     public static byte[] al(Context ctx, Ayar ayar, String metin) {
@@ -33,6 +52,7 @@ public class GeminiSes {
         if (dosya.exists() && dosya.length() > 1000) {
             try (FileInputStream in = new FileInputStream(dosya)) { sonRate = RATE; return oku(in); } catch (Exception ignored) {}
         }
+        if (System.currentTimeMillis() < kotaDoluKadar) return null;
         try {
             JSONObject voiceConfig = ses.startsWith("voice")   // kopyalanmış/özel ses kimliği (voice_... / voicekey_...)
                     ? new JSONObject().put("voice", ses)
@@ -56,6 +76,11 @@ public class GeminiSes {
             try (OutputStream os = con.getOutputStream()) { os.write(body.toString().getBytes(StandardCharsets.UTF_8)); }
             int code = con.getResponseCode();
             String resp = new String(oku(code < 400 ? con.getInputStream() : con.getErrorStream()), StandardCharsets.UTF_8);
+            if (code == 429) {
+                kotaDoluKadar = System.currentTimeMillis() + 15 * 60 * 1000L;
+                Log2.add(ctx, "Gemini ses kotası doldu, 15 dk telefonun sesi kullanılacak.");
+                return null;
+            }
             if (code >= 400) {
                 Log2.add(ctx, "Gemini ses hatası " + code + ": " + (resp.length() > 250 ? resp.substring(0, 250) : resp));
                 return null;

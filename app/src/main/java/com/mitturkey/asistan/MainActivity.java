@@ -29,7 +29,7 @@ public class MainActivity extends Activity implements Log2.Listener {
     private EditText key, model, ad, selam, bilgi, bekle;
     private Spinner ses, motor;
     private EditText sesAdi, sesModel;
-    private Button acKapa;
+    private Button acKapa, erisimB;
     private TextView log;
     private ProgressBar seviye;
     private Ayar ayar;
@@ -57,6 +57,14 @@ public class MainActivity extends Activity implements Log2.Listener {
         acKapa.setTextSize(18);
         acKapa.setOnClickListener(v -> acKapaTikla());
         k.addView(acKapa);
+
+        erisimB = new Button(this);
+        erisimB.setOnClickListener(v -> {
+            Toast.makeText(this, "Listede 'Sesli Asistan mikrofonu'nu bul ve aç", Toast.LENGTH_LONG).show();
+            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+        });
+        k.addView(erisimB);
+        k.addView(yazi("Açamıyorsan: Ayarlar > Uygulamalar > Sesli Asistan > sağ üst ⋮ > 'Kısıtlı ayarlara izin ver', sonra tekrar dene."));
 
         Button test = new Button(this);
         test.setText("🧪 Arama olmadan test et");
@@ -188,6 +196,9 @@ public class MainActivity extends Activity implements Log2.Listener {
         acKapa.setText(c ? "⛔ Asistanı KAPAT" : "▶️ Asistanı AÇ");
         acKapa.setBackgroundColor(c ? Color.rgb(198, 40, 40) : Color.rgb(46, 125, 50));
         acKapa.setTextColor(Color.WHITE);
+        String en = Settings.Secure.getString(getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+        boolean e = Erisim.acik() || (en != null && en.contains(getPackageName()));
+        erisimB.setText(e ? "♿ Aramada mikrofon izni: AÇIK ✅" : "♿ Aramada mikrofon izni: KAPALI ❌ (aç)");
     }
 
     private boolean izinVar() {

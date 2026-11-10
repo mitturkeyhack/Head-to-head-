@@ -142,7 +142,6 @@ public class Sohbet {
             byte[] pcm = GeminiSes.al(ctx, ayar, metin);
             if (pcm != null && !dur) { GeminiSes.cal(pcm, usage); Thread.sleep(250); return; }
             if (dur) return;
-            Log2.add(ctx, "(Gemini sesi alınamadı, telefonun sesi kullanılıyor)");
         }
         telefonKonus(metin);
     }
@@ -177,6 +176,7 @@ public class Sohbet {
             } catch (Exception e) { rec = null; }
         }
         if (rec == null) { Log2.add(ctx, "Mikrofon açılamadı!"); return null; }
+        if (!Erisim.acik()) Log2.add(ctx, "⚠️ Erişilebilirlik hizmeti kapalı: aramada mikrofon sessiz kalabilir.");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         short[] buf = new short[RATE / 10]; // 100 ms
