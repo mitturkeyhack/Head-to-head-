@@ -27,7 +27,8 @@ import java.util.List;
 
 public class MainActivity extends Activity implements Log2.Listener {
     private EditText key, model, ad, selam, bilgi, bekle;
-    private Spinner ses;
+    private Spinner ses, motor;
+    private EditText sesAdi, sesModel;
     private Button acKapa;
     private TextView log;
     private ProgressBar seviye;
@@ -85,6 +86,20 @@ public class MainActivity extends Activity implements Log2.Listener {
         k.addView(etiket("Asistanın bilmesi gerekenler (ör. tereyağı fiyatı, ne zaman müsait olduğun)"));
         bilgi = alan(ayar.bilgi(), true); k.addView(bilgi);
 
+        k.addView(etiket("Asistanın sesi"));
+        motor = new Spinner(this);
+        motor.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
+                new String[]{"Gemini yapay zekâ sesi (doğal)", "Telefonun kendi sesi"}));
+        motor.setSelection(ayar.geminiSes() ? 0 : 1);
+        k.addView(motor);
+        k.addView(etiket("Gemini ses adı"));
+        k.addView(yazi("Erkek: Charon, Puck, Orus, Fenrir, Iapetus  •  Kadın: Kore, Aoede, Leda, Sulafat"));
+        sesAdi = alan(ayar.sesAdi(), false); k.addView(sesAdi);
+        Button dene = new Button(this);
+        dene.setText("🔈 Sesi dene");
+        dene.setOnClickListener(v -> sesiDene());
+        k.addView(dene);
+
         k.addView(etiket("Asistan sesi hangi kanaldan çıksın (karşı taraf duymazsa değiştir)"));
         ses = new Spinner(this);
         ses.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
@@ -94,6 +109,8 @@ public class MainActivity extends Activity implements Log2.Listener {
 
         k.addView(etiket("Gemini modeli (genelde değiştirme)"));
         model = alan(ayar.model(), false); k.addView(model);
+        k.addView(etiket("Gemini ses modeli (genelde değiştirme)"));
+        sesModel = alan(ayar.sesModel(), false); k.addView(sesModel);
 
         Button kaydetB = new Button(this);
         kaydetB.setText("💾 Ayarları kaydet");
@@ -199,9 +216,23 @@ public class MainActivity extends Activity implements Log2.Listener {
         int sn;
         try { sn = Math.max(0, Math.min(60, Integer.parseInt(bekle.getText().toString().trim()))); } catch (Exception e) { sn = 10; }
         String m = model.getText().toString().trim();
-        ayar.kaydet(key.getText().toString().trim(), m.isEmpty() ? "gemini-flash-latest" : m,
+        ayar.kaydet(key.getText().toString().trim(), m.isEmpty() ? "gemini-3.5-flash" : m,
                 ad.getText().toString(), selam.getText().toString(), bilgi.getText().toString(),
                 sn, ses.getSelectedItemPosition());
+        ayar.sesKaydet(motor.getSelectedItemPosition() == 0, sesAdi.getText().toString().trim(),
+                sesModel.getText().toString().trim());
+    }
+
+    private void sesiDene() {
+        kaydet();
+        if (ayar.apiKey().isEmpty()) { Toast.makeText(this, "Önce Gemini API anahtarını gir", Toast.LENGTH_LONG).show(); return; }
+        Toast.makeText(this, "Ses hazırlanıyor...", Toast.LENGTH_SHORT).show();
+        new Thread(() -> {
+            String metin = "Merhaba, ben yapay zekâ asistanıyım. Size nasıl yardımcı olabilirim?";
+            byte[] pcm = GeminiSes.al(this, ayar, metin);
+            if (pcm == null) { runOnUiThread(() -> Toast.makeText(this, "Ses alınamadı, kayıtlara bak", Toast.LENGTH_LONG).show()); return; }
+            GeminiSes.cal(pcm, android.media.AudioAttributes.USAGE_MEDIA);
+        }).start();
     }
 
     private TextView etiket(String s) {

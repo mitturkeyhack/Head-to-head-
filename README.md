@@ -1,6 +1,6 @@
 # Sesli Asistan
 
-Sen telefonu açmazsan aramayı kendisi açar, hoparlörü açar, yapay zekâ (Gemini) Türkçe konuşur, arayanın kim olduğunu ve ne istediğini not alır.
+Sen telefonu açmazsan aramayı kendisi açar, hoparlörü açar, yapay zekâ (Gemini) doğal yapay zekâ sesiyle Türkçe konuşur, arayanın kim olduğunu ve ne istediğini not alır.
 
 - APK: GitHub > Actions > son çalışma > Artifacts > SesliAsistan-apk
 - Gemini API anahtarı: https://aistudio.google.com (ücretsiz)

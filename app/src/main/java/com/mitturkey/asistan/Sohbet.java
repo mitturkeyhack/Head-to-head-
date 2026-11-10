@@ -40,6 +40,7 @@ public class Sohbet {
     private final Ayar ayar;
     private volatile boolean dur = false;
     private TextToSpeech tts;
+    private int usage = AudioAttributes.USAGE_MEDIA;
     private final JSONArray gecmis = new JSONArray();
     private String ozet = "";
 
@@ -47,6 +48,7 @@ public class Sohbet {
 
     public void durdur() {
         dur = true;
+        GeminiSes.durdur();
         try { if (tts != null) tts.stop(); } catch (Exception ignored) {}
     }
 
@@ -113,7 +115,6 @@ public class Sohbet {
         if (durum[0] != TextToSpeech.SUCCESS) return false;
         int r = tts.setLanguage(new Locale("tr", "TR"));
         if (r < 0) Log2.add(ctx, "Uyarı: Türkçe ses paketi eksik olabilir (Ayarlar > Metin okuma).");
-        int usage;
         switch (ayar.sesTuru()) {
             case 1: usage = AudioAttributes.USAGE_ALARM; break;
             case 2: usage = AudioAttributes.USAGE_VOICE_COMMUNICATION; break;
@@ -134,8 +135,19 @@ public class Sohbet {
         }
     }
 
+    /** Önce Gemini sesiyle dener, olmazsa telefonun sesiyle söyler. */
     private void konus(String metin) throws InterruptedException {
         if (dur || metin == null || metin.isEmpty()) return;
+        if (ayar.geminiSes()) {
+            byte[] pcm = GeminiSes.al(ctx, ayar, metin);
+            if (pcm != null && !dur) { GeminiSes.cal(pcm, usage); Thread.sleep(250); return; }
+            if (dur) return;
+            Log2.add(ctx, "(Gemini sesi alınamadı, telefonun sesi kullanılıyor)");
+        }
+        telefonKonus(metin);
+    }
+
+    private void telefonKonus(String metin) throws InterruptedException {
         CountDownLatch l = new CountDownLatch(1);
         tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override public void onStart(String id) {}
