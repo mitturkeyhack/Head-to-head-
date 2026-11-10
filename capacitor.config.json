@@ -1,0 +1,9 @@
+{
+  "appId": "com.mitturkeyhack.kafakafaya",
+  "appName": "Kafa Kafaya",
+  "webDir": "www",
+  "backgroundColor": "#141B47",
+  "android": {
+    "allowMixedContent": false
+  }
+}
